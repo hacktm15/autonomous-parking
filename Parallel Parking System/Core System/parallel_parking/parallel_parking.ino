@@ -16,6 +16,10 @@
 #define CAR_LENGTH 20 //int cm
 #define MINIMUM_LIMIT 5 //in cm
 
+#define PARK_STATE_1 1 /*There is a car on the right*/ 
+#define PARK_STATE_2 2 /*There is empty space on the right and PARK_STATE_1 was set*/ 
+#define PARK_STATE_3 3 /*There is a car on the right and PARK_STATE_1 and PARK_STATE_2 where set*/ 
+
 /*Globals*/ 
 const byte PWMA = 3;  // PWM control (speed) for motor A
 const byte PWMB = 11; // PWM control (speed) for motor B
@@ -28,10 +32,10 @@ long MiddleSensor = sensorDistance(sensor_b_Trigger,sensor_b_Echo);
 long BackSensor   = sensorDistance(sensor_c_Trigger,sensor_c_Echo); 
 
 /*parkingState*/ 
- byte parkingState; 
+byte parkingState; 
 
 
-/**/ 
+/*Runs once*/ 
 void setup() 
 {
   Serial.begin(9600); 
@@ -39,11 +43,12 @@ void setup()
   motor_pinSetup();  
 }
 
-/**/ 
+/*Runs in a loop*/ 
 void loop() 
 {
- 
+ mainExecution(); 
 }
+
 /*Sensor PIN setup*/
 void sensor_pinSetup()
 {
@@ -87,8 +92,21 @@ long sensorDistance(int sensor_x_Trigger, int sensor_x_Echo)
   return distance;   
 }
 
+/*Main Execution function*/ 
+void mainExecution()
+{
+ if (checkSpace() == PARK_STATE_3)
+ {
+  //Run Parking Algo
+ }
+ else 
+ {
+  /*Conditions are not favourable for parallel parking*/
+ }
+}
+
 /*Checks if there is space for parking*/ 
-void checkSpace()
+bool checkSpace()
 {
 
   driveArdumoto(MOTOR_A, CW, 60); 
@@ -115,10 +133,12 @@ void checkSpace()
      {
        parkingState = 3; 
        stopArdumoto(MOTOR_A); 
-    }  
+    } 
+
+    return parkingState;  
 }
 
-/**/ 
+/*driveArdumoto */ 
 void driveArdumoto(byte motor, byte dir, byte spd)
 {
   if (motor == MOTOR_A)
@@ -133,8 +153,9 @@ void driveArdumoto(byte motor, byte dir, byte spd)
   }  
 }   
 
-// stopArdumoto makes a motor stop
+/*stopArdumoto makes a motor stop*/
 void stopArdumoto(byte motor)
 {
   driveArdumoto(motor, 0, 0);
 }
+
